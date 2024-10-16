@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
@@ -33,7 +34,18 @@ namespace DynamoDBOperations
         async Task QueryAllNotesPaginator(IAmazonDynamoDB ddbClient, string tableName, int pageSize)
         {
             // TODO 6: Add code that creates a paginator and prints the returned items
-
+            var scanRequest = new ScanRequest { TableName = tableName, Limit = pageSize };
+            IScanPaginator paginator = ddbClient.Paginators.Scan(scanRequest);
+            var pageNumber = 1;
+            await foreach (var response in paginator.Responses)
+            {
+                if (response.Items.Any())
+                {
+                    Console.WriteLine($"Start Page {pageNumber}");
+                    Print(response.Items);
+                    Console.WriteLine($"End Page {pageNumber++}");
+                }
+            }
 
             // End TODO 6
         }

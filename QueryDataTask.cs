@@ -43,7 +43,8 @@ namespace DynamoDBOperations
                 KeyConditionExpression = "UserId = :vUserId",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>{
                                                     { ":vUserId", new AttributeValue{S=userId } }
-                                                }
+                                                },
+                ProjectionExpression = "NoteId, Note"
             };
             
             
