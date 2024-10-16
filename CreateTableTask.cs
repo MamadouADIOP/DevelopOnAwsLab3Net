@@ -28,7 +28,7 @@ namespace DynamoDBOperations
 
                 // TODO 1: create an Amazon DynamoDB service client to pass to the
                 // main function.
-
+                ddbClient = new AmazonDynamoDBClient();
 
                 // End TODO1
 
@@ -68,7 +68,16 @@ namespace DynamoDBOperations
             // TODO 2: Add logic to create a table with UserId as the 
             // partition key and NoteId as the sort key, and return the
             // table's status.
+            var listOfKeySchemaElements = new List<KeySchemaElement> { new KeySchemaElement { AttributeName = tableDefinition.PartitionKey, KeyType = KeyType.HASH } ,
+                new KeySchemaElement { AttributeName = tableDefinition.SortKey, KeyType = KeyType.RANGE } };
 
+            var listOfAttributeDefinition = new List<AttributeDefinition> {
+                new AttributeDefinition {AttributeName= tableDefinition.PartitionKey, AttributeType = ScalarAttributeType.S },
+            new AttributeDefinition{ AttributeName = tableDefinition.SortKey,  AttributeType = ScalarAttributeType.N} };
+            var createTableRequest = new CreateTableRequest(tableDefinition.TableName, listOfKeySchemaElements, listOfAttributeDefinition,
+                new ProvisionedThroughput { ReadCapacityUnits = tableDefinition.ReadCapacity, WriteCapacityUnits = tableDefinition.WriteCapacity });
+            response = await ddbClient.CreateTableAsync(createTableRequest);
+            Console.WriteLine($"Table status:{response.TableDescription.TableStatus}");
 
             // End TODO 2
 
@@ -79,7 +88,10 @@ namespace DynamoDBOperations
         {
             // TODO 3: wait for creation of your new table to complete
 
-
+            while ((await GetTableInfo(ddbClient,tableName)).Table.TableStatus != TableStatus.ACTIVE)
+            {
+                await Task.Delay(10);
+            }
             // End TODO 3
         }
 

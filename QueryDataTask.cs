@@ -37,10 +37,20 @@ namespace DynamoDBOperations
 
             // TODO 5: Add code to query for a specific note with the parameter 
             // values available for use.
-
+            var queryRequest = new QueryRequest
+            {
+                TableName = tableName,
+                KeyConditionExpression = "UserId = :vUserId",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>{
+                                                    { ":vUserId", new AttributeValue{S=userId } }
+                                                }
+            };
+            
+            
+            items = (await ddbClient.QueryAsync(queryRequest)).Items;
 
             // End TODO 5
-            
+
             return items;
         }
 
