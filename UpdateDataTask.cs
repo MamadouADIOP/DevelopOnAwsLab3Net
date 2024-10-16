@@ -37,13 +37,22 @@ namespace DynamoDBOperations
 
         async Task UpdateNewAttribute(IAmazonDynamoDB ddbClient, string tableName, string userId, int noteId)
         {
-            Dictionary<string, AttributeValue> attributes = null;
 
             // TODO 7: Add code to set an 'Is_Incomplete' flag to 'Yes' for the note that matches the 
             // provided function parameters
-
+            UpdateItemRequest updateItemRequest = new UpdateItemRequest
+            {
+                TableName = tableName,
+                Key = new Dictionary<string, AttributeValue> {
+                    { "UserId", new AttributeValue { S = userId } },
+                    { "NoteId", new AttributeValue { N = noteId.ToString() } } },
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue> { { ":vIsIncomplete", new AttributeValue { S = "Yes" } } },
+                UpdateExpression = "Set  Is_Incomplete = :vIsIncomplete",
+                ReturnValues = ReturnValue.ALL_NEW
+            };
+            var response = await ddbClient.UpdateItemAsync(updateItemRequest);
+            Dictionary<string, AttributeValue> attributes = response.Attributes;
             // End TODO 7
-
             Print(attributes);
         }
 
@@ -54,7 +63,7 @@ namespace DynamoDBOperations
             try
             {
                 // TODO 8: Update existing maxSize value to correct value
-                var maxSize = "0 KB";                
+                var maxSize = "400 KB";
                 // End TODO 8
                 var request = new UpdateItemRequest
                 {
